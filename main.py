@@ -10,13 +10,15 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def process_with_llm(prompt_text):
     try:
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt_text,
+        response = openai.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "user", "content": prompt_text}
+            ],
             max_tokens=100,
             temperature=0.7
         )
-        return response.choices[0].text.strip()
+        return response.choices[0].message.content.strip()
     except Exception as e:
         return f"LLM Error: {str(e)}"
 
