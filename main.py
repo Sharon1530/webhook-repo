@@ -32,17 +32,14 @@ def webhook():
     data = request.json
     print("Webhook received:", data)
 
-    # Create a simple prompt for GPT
-    prompt = f"Summarize this GitHub webhook event:\n{data}"
+    # Create a dynamic prompt from webhook data
+    prompt_text = f"Received a GitHub event: {data}"
 
-    # Call OpenAI to process the event
-    llm_output = process_with_llm(prompt)
-    print("LLM Output:", llm_output)
+    # Get GPT-generated response
+    llm_output = process_with_llm(prompt_text)
+    print("LLM Response:", llm_output)
 
-    return jsonify({
-        "status": "received",
-        "llm_output": llm_output
-    }), 200
+    return jsonify({"status": "received", "llm_output": llm_output}), 200
 
 @app.route('/', methods=['GET'])
 def home():
