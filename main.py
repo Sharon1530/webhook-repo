@@ -19,8 +19,13 @@ def process_with_llm(prompt_text):
             temperature=0.7
         )
         return response.choices[0].message.content.strip()
-    except Exception as e:
-        return f"LLM Error: {str(e)}"
+     except Exception as e:
+        # Fallback response for demo/assignment if quota is exceeded
+        print(f"LLM Error: {str(e)}")
+        return (
+             "LLM call failed (likely due to quota exhaustion). "
+             "This is a simulated response for demonstration purposes."
+        )
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
