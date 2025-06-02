@@ -4,10 +4,10 @@ import os
 
 app = Flask(__name__)
 
-# Set your OpenAI API key
-# Option 1: Use environment variable
+# Load OpenAI API key from Replit Secret
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Function to process a prompt using GPT
 def process_with_llm(prompt_text):
     try:
         response = openai.chat.completions.create(
@@ -19,28 +19,31 @@ def process_with_llm(prompt_text):
             temperature=0.7
         )
         return response.choices[0].message.content.strip()
-     except Exception as e:
-        # Fallback response for demo/assignment if quota is exceeded
+
+    except Exception as e:
+        # Fallback: Handle quota errors or other API issues
         print(f"LLM Error: {str(e)}")
         return (
-             "LLM call failed (likely due to quota exhaustion). "
-             "This is a simulated response for demonstration purposes."
+            "LLM call failed (likely due to quota exhaustion). "
+            "This is a simulated response for demonstration purposes."
         )
 
+# Webhook endpoint to receive GitHub events
 @app.route('/webhook', methods=['POST'])
 def webhook():
     data = request.json
     print("Webhook received:", data)
 
-    # Create a dynamic prompt from webhook data
-    prompt_text = f"Received a GitHub event: {data}"
+    prompt = f"Summarize this GitHub webhook event:\n{data}"
+    llm_output = process_with_llm(prompt)
 
-    # Get GPT-generated response
-    llm_output = process_with_llm(prompt_text)
-    print("LLM Response:", llm_output)
+    print("LLM Output:", llm_output)
+    return jsonify({
+        "status": "received",
+        "llm_output": llm_output
+    }), 200
 
-    return jsonify({"status": "received", "llm_output": llm_output}), 200
-
+# Default route
 @app.route('/', methods=['GET'])
 def home():
     return "Webhook Server with LLM is Running!"
