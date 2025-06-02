@@ -1,12 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
+  <title>GitHub Event Tracker</title>
   <meta charset="UTF-8" />
-  <title>Webhook Events</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      color: #333;
+    }
+    .event {
+      background: white;
+      margin-bottom: 1em;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .summary {
+      font-style: italic;
+      color: #555;
+    }
+  </style>
 </head>
 <body>
-  <h1>Recent Webhook Events</h1>
-  <ul id="event-list"></ul>
-  <script src="/static/script.js"></script>
+  <h1>Latest GitHub Events</h1>
+  <div id="events"></div>
+
+  <script>
+    async function fetchEvents() {
+      const res = await fetch("/events/latest");
+      const data = await res.json();
+
+      const container = document.getElementById("events");
+      container.innerHTML = "";
+      data.forEach(event => {
+        const div = document.createElement("div");
+        div.className = "event";
+        div.innerHTML = `<strong>${event.text}</strong><div class="summary">${event.summary}</div>`;
+        container.appendChild(div);
+      });
+    }
+
+    // Poll every 15 seconds
+    fetchEvents();
+    setInterval(fetchEvents, 15000);
+  </script>
 </body>
 </html>
