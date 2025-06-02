@@ -1,2 +1,5 @@
 flask
 openai
+pymongo
+python-dotenv
+pytz
