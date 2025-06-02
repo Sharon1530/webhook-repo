@@ -34,7 +34,17 @@ def webhook():
     data = request.json
     print("Webhook received:", data)
 
-    prompt = f"Summarize this GitHub webhook event:\n{data}"
+    # Detect merged PR
+    if data.get("event") == "pull_request" and data.get("merged") == "true":
+        prompt = (
+            f"A pull request was just merged in the repository '{data.get('repository')}' "
+            f"by user '{data.get('sender')}'. Generate a concise changelog summary or merge announcement."
+        )
+    else:
+        # Default push or other event
+        prompt = f"Summarize this GitHub webhook event:\n{data}"
+
+    # Call LLM
     llm_output = process_with_llm(prompt)
 
     print("LLM Output:", llm_output)
