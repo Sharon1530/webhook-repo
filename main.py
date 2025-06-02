@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Set your OpenAI API key
 # Option 1: Use environment variable
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_KEY")
 
 def process_with_llm(prompt_text):
     try:
