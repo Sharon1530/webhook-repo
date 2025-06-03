@@ -8,6 +8,8 @@ import pytz
 
 load_dotenv()
 
+print("Loaded MONGO_URI:", os.getenv("MONGO_URI"))  # <-- Add this line
+
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 # API Key
@@ -80,11 +82,12 @@ def webhook():
 
     return jsonify({"status": "received", "summary": summary})
 
-
-@app.route('/')
+# Index supports GET for page, POST returns 405
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        return jsonify({"error": "POST method not allowed on root. Use /webhook for POST events."}), 405
     return render_template("index.html")
-
 
 @app.route('/events/latest')
 def latest_events():
@@ -113,6 +116,24 @@ def latest_events():
 @app.route('/static/<path:path>')
 def serve_static(path):
     return send_from_directory('static', path)
+
+# Test POST endpoint to /webhook internally
+@app.route('/test-webhook', methods=['GET'])
+def test_webhook():
+    import requests
+    # Build sample test data matching your webhook expected JSON
+    test_data = {
+        "repository": {"name": "test-repo"},
+        "pusher": {"name": "tester"},
+        "ref": "refs/heads/main"
+    }
+    # Use Flask's own URL for testing - assumes app runs on port 3000
+    webhook_url = "http://localhost:3000/webhook"
+    try:
+        resp = requests.post(webhook_url, json=test_data, headers={"X-GitHub-Event": "push"})
+        return jsonify({"test_webhook_response": resp.json()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == '__main__':
